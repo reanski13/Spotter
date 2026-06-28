@@ -1,114 +1,188 @@
 import { useState } from 'react';
-import { Mail, Lock, Circle, User, Target, Zap, Brain } from 'lucide-react';
-import { COLORS } from '../../constants/colors';
+import { Link, useNavigate } from 'react-router-dom';
+import { registerUser } from '../../services/authService';
 
-export default function Register() {
- 
+function Register() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    fitnessGoal: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setErrorMessage('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        fitnessGoal: formData.fitnessGoal,
+      });
+
+      navigate('/dashboard');
+    } catch (error) {
+      setErrorMessage(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: COLORS.bg.primary }}>
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
-        <div className="max-w-md w-full">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '8px', backgroundColor: COLORS.accent.purple, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={28} style={{ color: '#ffffff' }} />
-            </div>
-            <h2 className="text-3xl font-bold" style={{ color: COLORS.text.primary }}>Spotter</h2>
-          </div>
-
-          <h3 className="text-2xl font-bold mb-4" style={{ color: COLORS.text.primary }}>Your AI Digital Spotter.</h3>
-
-          <p className="mb-8" style={{ color: COLORS.text.secondary, fontSize: '15px', lineHeight: '1.6' }}>
-            Experience precision-driven performance. Spotter tracks your form, optimizes your sets, and builds your legacy with neural intelligence.
+    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Create Account</h1>
+          <p className="text-zinc-400 mt-2">
+            Start your fitness journey with Spotter.
           </p>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg border" style={{ backgroundColor: COLORS.bg.secondary, borderColor: COLORS.border.dark }}>
-              <Brain size={18} style={{ color: COLORS.accent.purple }} />
-              <span style={{ color: COLORS.text.primary, fontSize: '14px', fontWeight: '500' }}>Adaptive Neural Coaching</span>
-            </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg border" style={{ backgroundColor: COLORS.bg.secondary, borderColor: COLORS.border.dark }}>
-              <Zap size={18} style={{ color: COLORS.accent.purple }} />
-              <span style={{ color: COLORS.text.primary, fontSize: '14px', fontWeight: '500' }}>Real-time Form Correction</span>
-            </div>
-          </div>
         </div>
-      </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: COLORS.text.primary }}>Create your account</h1>
-            <p style={{ color: COLORS.text.secondary, fontSize: '14px' }}>Step into the next evolution of fitness.</p>
+        {errorMessage && (
+          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/40 text-red-300 px-4 py-3 text-sm">
+            {errorMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium mb-2">
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              placeholder="Enter your full name"
+              className="w-full rounded-lg bg-zinc-950 border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
           </div>
 
-          <div className="rounded-lg p-8 border" style={{ backgroundColor: COLORS.bg.secondary, borderColor: COLORS.border.dark }}>
-            <form className="space-y-5">
-              <div className="flex flex-col gap-2">
-                <label style={{ color: COLORS.text.secondary, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase' }}>Full Name</label>
-                <div className="relative flex items-center">
-                  <User size={18} className="absolute left-3" style={{ color: COLORS.text.tertiary }} />
-                  <input type="text" placeholder="John Doe" className="w-full px-3 py-2.5 pl-10 rounded-lg border" style={{ backgroundColor: COLORS.bg.tertiary, borderColor: COLORS.border.input, color: COLORS.text.primary }} />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label style={{ color: COLORS.text.secondary, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase' }}>Email Address</label>
-                <div className="relative flex items-center">
-                  <Mail size={18} className="absolute left-3" style={{ color: COLORS.text.tertiary }} />
-                  <input type="email" placeholder="john@example.com" className="w-full px-3 py-2.5 pl-10 rounded-lg border" style={{ backgroundColor: COLORS.bg.tertiary, borderColor: COLORS.border.input, color: COLORS.text.primary }} />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label style={{ color: COLORS.text.secondary, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase' }}>Fitness Goal</label>
-                <div className="relative flex items-center">
-                  <Target size={18} className="absolute left-3" style={{ color: COLORS.text.tertiary }} />
-                  <select className="w-full px-3 py-2.5 pl-10 rounded-lg border appearance-none" style={{ backgroundColor: COLORS.bg.tertiary, borderColor: COLORS.border.input, color: COLORS.text.primary }}>
-                    <option>Select your focus</option>
-                    <option>Strength Training</option>
-                    <option>Cardio & Endurance</option>
-                    <option>Flexibility & Mobility</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-2">
-                  <label style={{ color: COLORS.text.secondary, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase' }}>Password</label>
-                  <div className="relative flex items-center">
-                    <Lock size={18} className="absolute left-3" style={{ color: COLORS.text.tertiary }} />
-                    <input type="password" placeholder="••••••••" className="w-full px-3 py-2.5 pl-10 rounded-lg border" style={{ backgroundColor: COLORS.bg.tertiary, borderColor: COLORS.border.input, color: COLORS.text.primary }} />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label style={{ color: COLORS.text.secondary, fontSize: '11px', fontWeight: '700', textTransform: 'uppercase' }}>Confirm</label>
-                  <div className="relative flex items-center">
-                    <Lock size={18} className="absolute left-3" style={{ color: COLORS.text.tertiary }} />
-                    <input type="password" placeholder="••••••••" className="w-full px-3 py-2.5 pl-10 rounded-lg border" style={{ backgroundColor: COLORS.bg.tertiary, borderColor: COLORS.border.input, color: COLORS.text.primary }} />
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" className="w-full py-3 rounded-full font-semibold text-white mt-6" style={{ background: `linear-gradient(135deg, ${COLORS.accent.purple} 0%, ${COLORS.accent.purpleLight} 100%)`, textTransform: 'uppercase', fontSize: '13px' }}>
-                Create Account
-              </button>
-            </form>
-
-            <p className="text-center mt-6" style={{ color: COLORS.text.secondary, fontSize: '14px' }}>
-              Already using Spotter?{' '}
-              <button onClick={() => setPage('login')} style={{ color: COLORS.text.primary, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '500' }}>
-                Sign In
-              </button>
-            </p>
-
-            <p style={{ color: COLORS.text.tertiary, fontSize: '12px', textAlign: 'center', marginTop: '16px', lineHeight: '1.5' }}>
-              By creating an account, you agree to Spotter&apos;s Terms of Service and Privacy Policy.
-            </p>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="Enter your email"
+              className="w-full rounded-lg bg-zinc-950 border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
           </div>
-        </div>
+
+          <div>
+            <label htmlFor="fitnessGoal" className="block text-sm font-medium mb-2">
+              Fitness Goal
+            </label>
+            <select
+              id="fitnessGoal"
+              name="fitnessGoal"
+              value={formData.fitnessGoal}
+              onChange={handleChange}
+              required
+              className="w-full rounded-lg bg-zinc-950 border border-zinc-700 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+            >
+              <option value="">Select your goal</option>
+              <option value="Weight Loss">Weight Loss</option>
+              <option value="Muscle Gain">Muscle Gain</option>
+              <option value="Strength Training">Strength Training</option>
+              <option value="Endurance">Endurance</option>
+              <option value="General Fitness">General Fitness</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Create a password"
+              className="w-full rounded-lg bg-zinc-950 border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Confirm your password"
+              className="w-full rounded-lg bg-zinc-950 border border-zinc-700 px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-900 disabled:cursor-not-allowed px-4 py-3 font-semibold transition"
+          >
+            {loading ? 'Creating account...' : 'Create Account'}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-zinc-400 mt-6">
+          Already have an account?{' '}
+          <Link to="/login" className="text-violet-400 hover:text-violet-300">
+            Sign in
+          </Link>
+        </p>
+
+        <p className="text-center text-sm text-zinc-500 mt-4">
+          <Link to="/" className="hover:text-zinc-300">
+            Back to landing page
+          </Link>
+        </p>
       </div>
     </div>
   );
 }
+
+export default Register;
