@@ -19,7 +19,7 @@ import heroMark from '../../assets/hero.png';
 
 const profileRecord = {
   user_id: 'guest-user',
-  full_name: 'Garrison Allen',
+  full_name: 'Guest Athlete',
   email: 'guest@spotter.dev',
   fitness_goal: 'Strength Training',
   experience_level: 'Intermediate',
